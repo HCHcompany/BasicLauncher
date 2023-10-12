@@ -45,7 +45,14 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
         //Añadir las aplicaciones correspondientes y cargar sus etiquetas.
         ArrayList<AppModel> items = new ArrayList<AppModel>();
         for(int i = 0; i < apps.size(); i++){
-            
+            String pkg = apps.get(i).packageName;
+
+            //Añadir solo aplicaciones que se pueden iniciar.
+            if(context.getPackageManager().getLaunchIntentForPackage(pkg) != null){
+               AppModel app = new AppModel(getContext(), apps.get(i));
+               app.loadLabel(getContext());
+               items.add(app);
+            }//Se pueden añadir en otra lista las apps que no se pueden iniciar.
         }
 
         //Ordenar la lista.
