@@ -10,6 +10,7 @@ import androidx.loader.content.Loader;
 
 import com.launcher.anc.GlobalSettings;
 import com.launcher.anc.model.AppListAdapter;
+import com.launcher.anc.model.AppLoader;
 import com.launcher.anc.model.AppModel;
 import com.launcher.anc.model.GridFragmentBase;
 
@@ -37,22 +38,27 @@ public class Home extends GridFragmentBase implements LoaderManager.LoaderCallba
         setGridShown(false);
 
         // Crear el cargador para cargar la lista de aplicaciones en segundo plano.
-        //getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @NonNull
     @Override
     public Loader<ArrayList<AppModel>> onCreateLoader(int id, @Nullable Bundle args) {
-        return null;
+        return new AppLoader(getActivity());
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<ArrayList<AppModel>> loader, ArrayList<AppModel> data) {
-
+        adapter.setData(data);
+        if(isResumed()){
+            setGridShown(true);
+        }else{
+            setGridShownNoAnimation(true);
+        }
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<ArrayList<AppModel>> loader){
-
+        adapter.setData(null);
     }
 }
