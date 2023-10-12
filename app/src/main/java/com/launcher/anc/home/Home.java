@@ -37,7 +37,7 @@ public class Home extends GridFragmentBase implements LoaderManager.LoaderCallba
         setGridShown(false);
 
         // Crear el cargador para cargar la lista de aplicaciones en segundo plano.
-        getLoaderManager().initLoader(0, null, this);
+        //getLoaderManager().initLoader(0, null, this);
     }
 
     @NonNull

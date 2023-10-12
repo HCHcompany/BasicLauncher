@@ -186,16 +186,39 @@ public class GridFragmentBase extends Fragment{
                 if(root instanceof AppGridView){ // Si la vista raiz es la instancia de la clase u objeto GridView.
                     mGrid = (AppGridView)root; // Se añade a la variable global de grilla.
                 }else{
-                    mStandardEmptyView = (TextView) root.findViewById(GlobalSettings.INTERNAL_EMPTY_ID); // Se obtiene objeto texto por defecto por medio de su ID.
+                    if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                        mStandardEmptyView = (TextView) root.findViewById(GlobalSettings.ID_HOME_INTERNAL_EMPTY); // Se obtiene objeto texto por defecto por medio de su ID.
+                    }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+                        mStandardEmptyView = (TextView) root.findViewById(GlobalSettings.ID_WAGON_INTERNAL_EMPTY); // Se obtiene objeto texto por defecto por medio de su ID.
+                    }
+
                     if(mStandardEmptyView == null){ // Si el objeto de texto es nulo.
-                        mEmptyText = root.findViewById(android.R.id.empty); // Se recurre al ID por defecto de android empty.
+                        if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                            mEmptyText = root.findViewById(GlobalSettings.ID_HOME_INTERNAL_EMPTY); // Se recurre al ID por defecto de android empty.
+                        }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+                            mEmptyText = root.findViewById(GlobalSettings.ID_WAGON_INTERNAL_EMPTY); // Se recurre al ID por defecto de android empty.
+                        }
+
                     }else{ // De lo contrario.
                         mStandardEmptyView.setVisibility(View.GONE); // Se muestra el texto por defecto que contiene un mensaje en la vista de la grilla.
                     }
 
-                    mProgressContainer = root.findViewById(GlobalSettings.INTERNAL_PROGRESS_CONTAINER_ID); // Se obtiene el marco que contiene la barra de carga o de progreso.
-                    mGridContainer = root.findViewById(GlobalSettings.INTERNAL_LIST_CONTAINER_ID);
-                    View rawGrid = root.findViewById(android.R.id.list); //Obtener grilla por medio de ID asignada.
+                    if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                        mProgressContainer = root.findViewById(GlobalSettings.ID_HOME_PROGRESS_CONTAINER); // Se obtiene el marco que contiene la barra de carga o de progreso.
+                        mGridContainer = root.findViewById(GlobalSettings.ID_HOME_INTERNAL_LIST_CONTAINER);
+                    }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+                        mProgressContainer = root.findViewById(GlobalSettings.ID_WAGON_PROGRESS_CONTAINER); // Se obtiene el marco que contiene la barra de carga o de progreso.
+                        mGridContainer = root.findViewById(GlobalSettings.ID_WAGON_INTERNAL_LIST_CONTAINER);
+                    }
+
+
+                    View rawGrid = null;
+                    if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                        rawGrid = root.findViewById(GlobalSettings.ID_HOME_VIEW_FRAGMENT_GRID); //Obtener grilla por medio de ID asignada.
+                    }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+                        rawGrid = root.findViewById(GlobalSettings.ID_WAGON_VIEW_FRAGMENT_GRID); //Obtener grilla por medio de ID asignada.
+                    }
+
                     if(!(rawGrid instanceof AppGridView)){
                         if(rawGrid == null){
                             throw new RuntimeException("En el id \"android.R.id.list\", no existe la vista de la grilla es nula."); // Lanzar una excepcion de tiempo de ejecucion que muestre un mesaje de que la grilla es nula.
