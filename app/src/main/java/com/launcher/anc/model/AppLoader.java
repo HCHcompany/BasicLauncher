@@ -61,27 +61,79 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
     }
 
     @Override
-    public void deliverResult(@Nullable ArrayList<AppModel> data) {
-        super.deliverResult(data);
+    public void deliverResult(@Nullable ArrayList<AppModel> apps){
+        if(isReset()){
+            if(apps != null){
+                onReleaseResouces(apps);
+            }
+        }
+
+        ArrayList<AppModel> oldApps = apps;
+        installedApps = apps;
+
+        if(isStarted()){
+            // Si el cargador está actualmente iniciado, podemos inmediatamente entregar sus resultados.
+            super.deliverResult(apps);
+        }
+
+        // En este punto podemos liberar los recursos asociados con
+        // 'oldApps' si es necesario; Ahora que se entrega el nuevo resultado,
+        // sabemos que ya no está en uso.
+        if(oldApps != null){
+            onReleaseResouces(oldApps);
+        }
     }
 
     @Override
     protected void onStartLoading() {
+        if(installedApps != null){
+            // Si actualmente tenemos un resultado disponible, entrégarlo inmediatamente.
+            deliverResult(installedApps);
+        }
+
+        // Recibir los cambios en la operación de instalación y desinstalación de aplicaciones.
+        if(receiver == null){
+           receiver = new PackageReceiver(this);
+        }
+
+        if(takeContentChanged() || installedApps == null){
+            // Si los datos han cambiado desde la última vez que se cargaron
+            // o no está disponible actualmente, inicia una carga.
+            forceLoad();
+        }
+
         super.onStartLoading();
     }
 
     @Override
     protected void onStopLoading() {
-        super.onStopLoading();
+        cancelLoad(); //Cancelar carga.
     }
 
     @Override
-    public void onCanceled(@Nullable ArrayList<AppModel> data) {
-        super.onCanceled(data);
+    public void onCanceled(@Nullable ArrayList<AppModel> apps) {
+        super.onCanceled(apps);
+        onReleaseResouces(apps);
     }
 
     @Override
     protected void onReset() {
-        super.onReset();
+        // Detener el cargador.
+        onStopLoading();
+
+        // En este punto podemos liberar los recursos asociados con las 'aplicaciones' si es necesario.
+        if(installedApps != null){
+            onReleaseResouces(installedApps);
+            installedApps = null;
+        }
+
+        // Detener el servicio de recibimiento de informacion de apps.
+        if(receiver != null){
+            getContext().unregisterReceiver(receiver);
+            receiver = null;
+        }
     }
+
+    //Método auxiliar para hacer el trabajo de limpieza si es necesario, por ejemplo si estamos usando Cursor, entonces deberíamos cerrarlo aquí.
+    protected void onReleaseResouces(ArrayList<AppModel> apps){}
 }
