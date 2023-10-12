@@ -61,4 +61,6 @@ public class Home extends GridFragmentBase implements LoaderManager.LoaderCallba
     public void onLoaderReset(@NonNull Loader<ArrayList<AppModel>> loader){
         adapter.setData(null);
     }
+
+
 }
