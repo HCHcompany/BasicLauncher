@@ -18,8 +18,7 @@ public class MainActivity extends FragmentActivity {
         if(isHome){
 
         }else{
-            setContentView(R.layout.home);
-            isHome = true;
+            
         }
         //super.onBackPressed();
     }
