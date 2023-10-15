@@ -52,7 +52,7 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
             String pkg = apps.get(i).packageName;
 
             //Añadir solo aplicaciones que se pueden iniciar.
-            if(context.getPackageManager().getLaunchIntentForPackage(pkg) != null){
+            if(context.getPackageManager().getLaunchIntentForPackage(pkg) != null && !pkg.equals("com.launcher.anc")){
                if(INSTANCE == GlobalSettings.HOME_INSTANCE){
                    boolean exists = false;
                    for(String pack : GlobalSettings.PACKAGES){

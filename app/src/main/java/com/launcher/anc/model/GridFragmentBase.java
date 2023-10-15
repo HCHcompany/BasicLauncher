@@ -166,7 +166,11 @@ public class GridFragmentBase extends Fragment{
                             }
 
                             if(isViewKeyboard){
-                                gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                if(GlobalSettings.NUMS_COLUMS_GRID_APPS < 3){
+                                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                }else{
+                                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                }
                             }else{
                                 gridapps.getLayoutParams().height = GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT;
                             }
@@ -189,7 +193,11 @@ public class GridFragmentBase extends Fragment{
                         GlobalSettings.WAGON_GRID_VIEW = gridapps;
                         GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = gridapps.getLayoutParams().height;
                     }
-                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    if(GlobalSettings.NUMS_COLUMS_GRID_APPS < 3){
+                        gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    }else{
+                        gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    }
                     isTouch = true;
                     return false;
                 }
@@ -202,7 +210,11 @@ public class GridFragmentBase extends Fragment{
                         GlobalSettings.WAGON_GRID_VIEW = gridapps;
                         GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = gridapps.getLayoutParams().height;
                     }
-                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    if(GlobalSettings.NUMS_COLUMS_GRID_APPS < 3){
+                        gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    }else{
+                        gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    }
                     isTouch = true;
                 }
             });
@@ -223,12 +235,16 @@ public class GridFragmentBase extends Fragment{
                                       isViewKeyboard = false;
                                   }else{
                                       isViewKeyboard = true;
-                                      gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                      if(GlobalSettings.NUMS_COLUMS_GRID_APPS < 3){
+                                          gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                      }else{
+                                          gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                                      }
                                   }
                               }else{
                                   isViewKeyboard = true;
                               }
-                            Thread.sleep(500);
+                            Thread.sleep(850);
                         }
                     }catch (Exception e){}
                 }
@@ -409,9 +425,9 @@ public class GridFragmentBase extends Fragment{
                 mGridShown = true; // Cambia el estado de vista a "mostrar".
 
                 if(INSTANCE == GlobalSettings.HOME_INSTANCE){
-                    mGrid.setOnItemClickListener(new HomeListener()); // Se añade una accion para cada item en la grilla.
+                    mGrid.setOnItemClickListener(new HomeListener(getActivity())); // Se añade una accion para cada item en la grilla.
                 }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
-                    mGrid.setOnItemClickListener(new WagonListener()); // Se añade una accion para cada item en la grilla.
+                    mGrid.setOnItemClickListener(new WagonListener(getActivity())); // Se añade una accion para cada item en la grilla.
                 }
 
                 if(mAdapter != null){

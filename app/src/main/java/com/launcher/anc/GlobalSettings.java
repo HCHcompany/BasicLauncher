@@ -21,7 +21,7 @@ public class GlobalSettings{
     //Global Variables
     public static float XDPI_ICON_GRID = 60;
     public static float YDPI_ICON_GRID = 60;
-    public static int NUMS_COLUMS_GRID_APPS = 3; //2 o se trabajara en otra opcion (adaptativo = GridView.AUTO_FIT).
+    public static int NUMS_COLUMS_GRID_APPS = 2; //2 o se trabajara en otra opcion (adaptativo = GridView.AUTO_FIT).
     public static FragmentActivity HOME_ACTIVITY = null;
     public static FragmentActivity WAGON_ACTIVITY = null;
     public static AppGridView WAGON_GRID_VIEW = null;
