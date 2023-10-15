@@ -1,5 +1,6 @@
 package com.launcher.anc.model;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -36,9 +37,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.launcher.anc.GlobalSettings;
+import com.launcher.anc.R;
 import com.launcher.anc.listeners.HomeListener;
 import com.launcher.anc.listeners.WagonListener;
 import com.launcher.anc.wagon.WagonView;
+
+import java.util.ArrayList;
 
 public class GridFragmentBase extends Fragment{
 
@@ -52,6 +56,7 @@ public class GridFragmentBase extends Fragment{
     private boolean mGridShown = false; // Estado vista grilla mostrar/no mostrar.
     private ListAdapter mAdapter = null; // Adaptador de lista para mostrar los items en la grilla.
     private boolean isTouch = false;
+    private boolean isViewKeyboard = false;
     private Thread updateThread = null;
 
     private final Runnable mRequestFocus = new Runnable() { // Solicitar enfoque de la grilla.
@@ -69,6 +74,7 @@ public class GridFragmentBase extends Fragment{
          this.activity = activity;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -141,7 +147,35 @@ public class GridFragmentBase extends Fragment{
             txt.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    //if(!txt.getText().toString().isEmpty()){
+                        ArrayList<AppModel> tmp_model = ((AppListAdapter)mAdapter).getData();
+                        if(tmp_model != null){
+                            String indicio = txt.getText().toString();
+                            ArrayList<AppModel> apps = new ArrayList<AppModel>();
+                            for(AppModel m : tmp_model){
+                                if(m.getLabel().contains(indicio) || m.getLabel().contains(indicio.toLowerCase())){
+                                    apps.add(m);
+                                }
+                            }
 
+                            AppListAdapter tmp_adapter = new AppListAdapter(context);
+                            tmp_adapter.setData(apps);
+                            gridapps.setAdapter(tmp_adapter);
+                            if(!mGridShown && !(tmp_adapter != null)){
+                                setGridShown(true, (getView().getWindowToken() != null)); //Barra de progreso.
+                            }
+
+                            if(isViewKeyboard){
+                                gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                            }else{
+                                gridapps.getLayoutParams().height = GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT;
+                            }
+                            isTouch = true;
+                        }else{
+                            //gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                            isTouch = true;
+                        }
+                    //}
                 }
                 @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
                 @Override public void afterTextChanged(Editable editable) {}
@@ -184,50 +218,30 @@ public class GridFragmentBase extends Fragment{
                                   if(mi.isActive()){
                                       if(GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT != 0){
                                           gridapps.getLayoutParams().height =  GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT;
-                                          GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = 0;
-                                          GlobalSettings.WAGON_GRID_VIEW = null;
                                       }
                                       isTouch = false;
-                                      //break;
+                                      isViewKeyboard = false;
+                                  }else{
+                                      isViewKeyboard = true;
+                                      gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
                                   }
                               }else{
-                                  Thread.sleep(1000);
+                                  isViewKeyboard = true;
                               }
+                            Thread.sleep(500);
                         }
                     }catch (Exception e){}
                 }
             });
             updateThread.start();
-
-            txt.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-
-                }
-            });
-
-            //gridapps.setY(pixm);
-            //txt.setY(pixm);
-
-
             lframe.addView(txt, lp1);
         }
 
         //Boton para abrir la grilla.
         Button ini = new Button(context);
-        ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(200, 200);
+        ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(280, 280);
         ini.setLayoutParams(lp);
-        ini.setY(30);
+        ini.setY(10);
         ini.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -240,10 +254,17 @@ public class GridFragmentBase extends Fragment{
             }
         });
 
+        if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+           ini.setBackgroundResource(R.drawable.menu);
+        }else{
+            ini.setBackgroundResource(R.drawable.back);
+        }
+
         //Añadir al marco.
         lframe.addView(gridapps, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (metrics.heightPixels - ((lp.height + (lp.height / 2))) - (pixm)))); // Se añade la grilla al marco de vista de aplicaciones.
         lframe.addView(ini, lp); // Se añade la grilla al marco de vista de aplicaciones.
 
+        GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = gridapps.getLayoutParams().height;
         root.addView(lframe, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)); // Se añade el marco de vista de aplicaciones al marco root de la actividad.
 
         //----------------------------------------------------------------------------------------------------------------------------------

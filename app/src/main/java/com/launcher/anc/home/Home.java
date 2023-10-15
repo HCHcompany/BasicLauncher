@@ -17,7 +17,7 @@ import com.launcher.anc.model.GridFragmentBase;
 
 import java.util.ArrayList;
 
-public class Home extends GridFragmentBase{
+public class Home extends GridFragmentBase implements LoaderManager.LoaderCallbacks<ArrayList<AppModel>>{
 
     private AppListAdapter adapter;
     private Context context;
@@ -36,6 +36,30 @@ public class Home extends GridFragmentBase{
         setGridAdapter(adapter);
 
         // Hasta que se cargan los datos muestra una ruleta o pantalla de carga
-        setGridShown(true);
+        setGridShown(false);
+
+        // Crear el cargador para cargar la lista de aplicaciones en segundo plano.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @NonNull
+    @Override
+    public Loader<ArrayList<AppModel>> onCreateLoader(int id, @Nullable Bundle args) {
+        return new AppLoader(getActivity(), GlobalSettings.HOME_INSTANCE);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<ArrayList<AppModel>> loader, ArrayList<AppModel> data) {
+        adapter.setData(data);
+        if(isResumed()){
+            setGridShown(true);
+        }else{
+            setGridShownNoAnimation(true);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<ArrayList<AppModel>> loader){
+        adapter.setData(null);
     }
 }

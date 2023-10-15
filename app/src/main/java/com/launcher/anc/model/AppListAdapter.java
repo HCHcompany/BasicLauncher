@@ -21,8 +21,9 @@ import java.util.Collection;
 public class AppListAdapter extends ArrayAdapter<AppModel> {
 
     private final LayoutInflater inflater;
-
     private final Context context;
+
+    private ArrayList<AppModel> data;
 
     public AppListAdapter(Context context){
         super(context, android.R.layout.simple_list_item_2);//Por modificar
@@ -32,9 +33,14 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
 
     public void setData(ArrayList<AppModel> data){
         if(data != null){
+            this.data = data;
             this.clear();
             this.addAll(data);
         }
+    }
+
+    public ArrayList<AppModel> getData(){
+        return this.data;
     }
 
     @Override

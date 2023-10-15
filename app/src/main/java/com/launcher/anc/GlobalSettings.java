@@ -15,8 +15,8 @@ public class GlobalSettings{
     //Global Constant.
     public static final String EMPTY_MESSAGE_DEFAULT_GRIDVIEW = "No existen aplicaciones instaladas."; //Mensaje general de vacio.
     public static final int WIDTH_COLUMS_GRID_APPS = 60; // 60, 70 o adaptativo.
-    public static final int SPACES_HORIZONTAL_GRID_APPS = 4; // Espacio por cada item de manera horizontal.
-    public static final int SPACES_VERTICAL_GRID_APPS = 4; // Espacio por cada item de manera vertical.
+    public static final int SPACES_HORIZONTAL_GRID_APPS = 10; // Espacio por cada item de manera horizontal.
+    public static final int SPACES_VERTICAL_GRID_APPS = 10; // Espacio por cada item de manera vertical.
 
     //Global Variables
     public static float XDPI_ICON_GRID = 60;
@@ -45,6 +45,14 @@ public class GlobalSettings{
     public static final int ID_WAGON_INTERNAL_LIST_CONTAINER = 0x00ff0011; // ID para la grilla con aplicaciones.
 
     //com.launcher.anc.home.Home
+    public static final String PACKAGES[] = {
+            "com.whatsapp",
+            "com.facebook.katana",
+            "com.instagram.android",
+            "com.facebook.lite",
+            "com.instagram.lite",
+            "com.facebook.orca"
+    };
 
     //Metodos.
     public static boolean isFirstUser(){

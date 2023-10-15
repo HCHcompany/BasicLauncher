@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
 
+import com.launcher.anc.GlobalSettings;
+
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +21,7 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
     private ArrayList<AppModel> installedApps;
     private final PackageManager pm;
     private PackageReceiver receiver;
+    private final int INSTANCE;
     public static final Comparator<AppModel> ALPHA_COMPARATOR = new Comparator<AppModel>() {
         private final Collator collator = Collator.getInstance();
         @Override
@@ -27,8 +30,9 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
         }
     };
 
-    public AppLoader(Context context) {
+    public AppLoader(Context context, int instance) {
         super(context);
+        this.INSTANCE = instance;
         this.context = context;
         this.pm = this.context.getPackageManager();
     }
@@ -49,9 +53,25 @@ public class AppLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
 
             //Añadir solo aplicaciones que se pueden iniciar.
             if(context.getPackageManager().getLaunchIntentForPackage(pkg) != null){
-               AppModel app = new AppModel(getContext(), apps.get(i));
-               app.loadLabel(getContext());
-               items.add(app);
+               if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                   boolean exists = false;
+                   for(String pack : GlobalSettings.PACKAGES){
+                       if(pack.equals(pkg)){
+                           exists = true;
+                           break;
+                       }
+                   }
+
+                   if(exists){
+                       AppModel app = new AppModel(getContext(), apps.get(i));
+                       app.loadLabel(getContext());
+                       items.add(app);
+                   }
+               }else{
+                   AppModel app = new AppModel(getContext(), apps.get(i));
+                   app.loadLabel(getContext());
+                   items.add(app);
+               }
             }//Se pueden añadir en otra lista las apps que no se pueden iniciar.
         }
 

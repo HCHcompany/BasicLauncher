@@ -44,7 +44,7 @@ public class Wagon extends GridFragmentBase implements LoaderManager.LoaderCallb
     @NonNull
     @Override
     public Loader<ArrayList<AppModel>> onCreateLoader(int id, @Nullable Bundle args) {
-        return new AppLoader(getActivity());
+        return new AppLoader(getActivity(), GlobalSettings.WAGON_INSTANCE);
     }
 
     @Override
