@@ -79,7 +79,9 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
         //Añadir informacion.
         icon.setImageDrawable(item.getIcon());
         title.setText(item.getLabel());
+
+        data.get(position).setTextView(title);
+        data.get(position).setImageView(icon);
         return view;
     }
-
 }

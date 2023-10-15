@@ -20,5 +20,6 @@ public class AppGridView extends GridView {
         this.setHorizontalSpacing(GlobalSettings.SPACES_HORIZONTAL_GRID_APPS); // Espacios por item de manera horizontal.
         this.setVerticalSpacing(GlobalSettings.SPACES_VERTICAL_GRID_APPS); // Espacios por item de manera vertical.
         this.setSmoothScrollbarEnabled(true); // Suavizar el desplazamiento de la barra de movimiento de la grilla.
+        this.setBackgroundColor(Color.argb(40, 0, 0, 0));
     }
 }

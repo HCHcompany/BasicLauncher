@@ -1,6 +1,7 @@
 package com.launcher.anc.welcome;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -18,6 +20,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,8 +28,10 @@ import androidx.fragment.app.Fragment;
 
 import com.launcher.anc.GlobalSettings;
 import com.launcher.anc.R;
+import com.launcher.anc.home.HomeView;
 import com.launcher.anc.model.AppListAdapter;
 import com.launcher.anc.model.AppLoader;
+import com.launcher.anc.model.AppModel;
 
 import java.util.ArrayList;
 
@@ -34,7 +39,8 @@ public class Welcome extends Fragment {
 
     private Context context;
     private int opc = 0;
-    private final ArrayList<String> apps_packages = new ArrayList<String>();
+    private final ArrayList<String> PACKAGES = new ArrayList<String>();
+    private AppListAdapter adapter = null;
 
     @Nullable
     @Override
@@ -218,7 +224,7 @@ public class Welcome extends Fragment {
         apps.setHorizontalSpacing(GlobalSettings.SPACES_HORIZONTAL_GRID_APPS); // Espacios por item de manera horizontal.
         apps.setVerticalSpacing(GlobalSettings.SPACES_VERTICAL_GRID_APPS); // Espacios por item de manera vertical.
         apps.setSmoothScrollbarEnabled(true); // Suavizar el desplazamiento de la barra de movimiento de la grilla.
-        apps.setBackgroundColor(Color.argb(30, 0, 0, 0));
+        apps.setBackgroundColor(Color.argb(40, 0, 0, 0));
         select.addView(apps, apps.getLayoutParams());
 
 
@@ -281,11 +287,38 @@ public class Welcome extends Fragment {
                     GlobalSettings.adapterIcons((opc + 1), getActivity());
                     apps.setNumColumns(GlobalSettings.NUMS_COLUMS_GRID_APPS); // Numero de columnas que tendra la grilla.
                     AppLoader loader = new AppLoader(getActivity(), GlobalSettings.WAGON_INSTANCE);
-                    AppListAdapter adapter = new AppListAdapter(getActivity());
+                    adapter = new AppListAdapter(getActivity());
                     adapter.setData(loader.loadInBackground());
                     apps.setAdapter(adapter);
                 }else{
                     comment.setTextColor(Color.RED);
+                }
+            }
+        });
+
+        apps.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l){
+                AppModel app = (AppModel)adapterView.getItemAtPosition(i);
+                if(app != null){
+                    PACKAGES.add(app.getApplicationPackageName());
+                    adapter.remove(adapter.getItem(i));
+                    apps.setAdapter(adapter);
+                    Toast.makeText(getContext(), "Applicacion " + app.getLabel() + " ha sido fijada.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(GlobalSettings.saveSettings(opc, PACKAGES, getContext())){
+                    Toast.makeText(getContext(), "Datos guardados.", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(GlobalSettings.MAIN_ACTIVITY, HomeView.class);
+                    startActivity(i);
+                    GlobalSettings.WELCOME_ACTIVITY.finish();
+                }else{
+                    Toast.makeText(getContext(), "Error al guardar datos.", Toast.LENGTH_LONG).show();
                 }
             }
         });

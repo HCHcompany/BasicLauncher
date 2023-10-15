@@ -2,6 +2,10 @@ package com.launcher.anc.model;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 
@@ -14,6 +18,10 @@ public class AppModel {
 
     private boolean mMounted; //montada?
     private final File mApkFile; //El archivo apk.
+
+    private TextView txtv = null;
+    private ImageView imgv = null;
+    private boolean selected = false;
 
     public AppModel(Context context, ApplicationInfo info){
         mContext = context;
@@ -31,6 +39,26 @@ public class AppModel {
 
     public String getLabel() {
         return mAppLabel;
+    }
+
+    public void setTextView(TextView txt){
+        if(this.txtv == null){
+            this.txtv = txt;
+        }
+    }
+
+    public TextView getTextView(){
+        return this.txtv;
+    }
+
+    public void setImageView(ImageView img){
+        if(this.imgv == null){
+            this.imgv = img;
+        }
+    }
+
+    public ImageView getImageView(){
+        return this.imgv;
     }
 
     public Drawable getIcon() {
@@ -56,6 +84,13 @@ public class AppModel {
         return mContext.getResources().getDrawable(android.R.drawable.sym_def_app_icon);
     }
 
+    public boolean isSelected(){
+        return this.selected;
+    }
+
+    public void setSelected(boolean bln){
+        this.selected = bln;
+    }
 
     void loadLabel(Context context) {
         if (mAppLabel == null || !mMounted) {

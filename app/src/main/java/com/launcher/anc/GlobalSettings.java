@@ -1,15 +1,22 @@
 package com.launcher.anc;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
 import com.launcher.anc.model.AppGridView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 public class GlobalSettings{
     //Global Constant.
@@ -24,6 +31,8 @@ public class GlobalSettings{
     public static int NUMS_COLUMS_GRID_APPS = 4; //2 o se trabajara en otra opcion (adaptativo = GridView.AUTO_FIT).
     public static FragmentActivity HOME_ACTIVITY = null;
     public static FragmentActivity WAGON_ACTIVITY = null;
+    public static FragmentActivity WELCOME_ACTIVITY = null;
+    public static Activity MAIN_ACTIVITY = null;
     public static AppGridView WAGON_GRID_VIEW = null;
     public static int WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = 0;
 
@@ -45,18 +54,18 @@ public class GlobalSettings{
     public static final int ID_WAGON_INTERNAL_LIST_CONTAINER = 0x00ff0011; // ID para la grilla con aplicaciones.
 
     //com.launcher.anc.home.Home
-    public static final String PACKAGES[] = {
-            "com.whatsapp",
-            "com.facebook.katana",
-            "com.instagram.android",
-            "com.facebook.lite",
-            "com.instagram.lite",
-            "com.facebook.orca"
-    };
+    public static final ArrayList<String> PACKAGES = new ArrayList<String>();
 
     //Metodos.
-    public static boolean isFirstUser(){
-         return false;
+    public static boolean isFirstUser(Context context){
+        File packs = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath()  + "/array.ar");
+        File settings = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath()  + "/settings.ar");
+
+        if(!packs.exists() || !settings.exists()){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     //Se adapta a la pantalla.
@@ -76,7 +85,82 @@ public class GlobalSettings{
         NUMS_COLUMS_GRID_APPS = cols;
     }
 
-    public static boolean GlobalSettingsLoad(){
-        return false;
+    public static boolean saveSettings(int cols, ArrayList<String> packages, Context context){
+        Toast.makeText(context, "" + cols, Toast.LENGTH_LONG).show();
+        PACKAGES.add("com.whatsapp");
+        PACKAGES.add("com.facebook.katana");
+        PACKAGES.add("com.instagram.android");
+        PACKAGES.add("com.facebook.lite");
+        PACKAGES.add("com.instagram.lite");
+        PACKAGES.add("com.facebook.orca");
+
+        for(String new_p : packages){
+            if(!PACKAGES.contains(new_p)){
+                PACKAGES.add(new_p);
+            }
+        }
+
+        File packs = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath() + "/array.ar");
+        File settings = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath() + "/settings.ar");
+
+        if(packs.exists()){
+            packs.delete();
+        }
+
+        if(settings.exists()){
+            settings.delete();
+        }
+
+        try{
+            packs.createNewFile();
+            settings.createNewFile();
+
+            FileWriter wr0 = new FileWriter(packs, true);
+            for(String p : PACKAGES){
+                wr0.append(p + "\n");
+            }
+            wr0.close();
+
+            FileWriter wr1 = new FileWriter(settings, true);
+            wr1.write("cols:"+cols);
+            wr1.close();
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    public static boolean GlobalSettingsLoad(Context context){
+        try{
+            File packs = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath() + "/array.ar");
+            File settings = new File(context.getExternalFilesDirs(null)[0].getAbsolutePath() + "/settings.ar");
+
+            if(packs.exists() && settings.exists()){
+                FileReader r0 = new FileReader(packs);
+                BufferedReader b0 = new BufferedReader(r0);
+
+                while(b0.ready()){
+                      PACKAGES.add(b0.readLine());
+                }
+                b0.close();
+                r0.close();
+
+                FileReader r1 = new FileReader(settings);
+                BufferedReader b1 = new BufferedReader(r1);
+
+                while(b1.ready()){
+                      String line = b1.readLine();
+                      if(line.startsWith("cols:")){
+                          adapterIcons(Integer.valueOf(line.replace("cols:", "").trim()) ,context);
+                      }
+                }
+
+                return true;
+            }else{
+               return false;
+            }
+        }catch (Exception e){
+            return false;
+        }
     }
 }
