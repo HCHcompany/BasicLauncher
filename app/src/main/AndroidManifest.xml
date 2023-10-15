@@ -41,6 +41,12 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
         </activity>
+
+        <activity
+            android:name=".welcome.WelcomeView"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
     </application>
 
 </manifest>

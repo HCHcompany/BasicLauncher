@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.launcher.anc.home.HomeView;
+import com.launcher.anc.welcome.WelcomeView;
 
 public class MainActivity extends Activity{
 
@@ -14,7 +15,7 @@ public class MainActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        Intent i = new Intent(this, HomeView.class);
+        Intent i = new Intent(this, WelcomeView.class);
         startActivity(i);
     }
 
