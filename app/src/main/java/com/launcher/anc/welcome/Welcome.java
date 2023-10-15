@@ -304,7 +304,7 @@ public class Welcome extends Fragment {
                     PACKAGES.add(app.getApplicationPackageName());
                     adapter.remove(adapter.getItem(i));
                     apps.setAdapter(adapter);
-                    Toast.makeText(getContext(), "Applicacion " + app.getLabel() + " ha sido fijada.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Applicacion " + app.getLabel() + " ha sido fijada.", Toast.LENGTH_SHORT).show();
                 }
             }
         });

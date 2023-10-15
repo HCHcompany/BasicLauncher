@@ -68,25 +68,16 @@ public class GlobalSettings{
         }
     }
 
-    //Se adapta a la pantalla.
-    public static void convertToPixels(float dp, Context context){
-        Resources res = context.getResources();
-        XDPI_ICON_GRID = dp;
-        YDPI_ICON_GRID = dp;
-        NUMS_COLUMS_GRID_APPS = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, res.getDisplayMetrics());
-    }
-
     //Obtiene un valor por medio de columnas.
     public static void adapterIcons(int cols, Context context){
         Resources res = context.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
         XDPI_ICON_GRID = ((metrics.widthPixels / cols));// * (metrics.density));
-        YDPI_ICON_GRID = (((metrics.heightPixels / cols)) / 3) + (((cols == 3) ? cols : (cols == 2) ? (3 + cols) : 3) * 22);// * (metrics.density)) / 2;
+        YDPI_ICON_GRID = (((metrics.heightPixels / cols)) / 3) + (((cols == 3) ? cols : (cols == 2) ? (3 + cols) : 3) * 22);
         NUMS_COLUMS_GRID_APPS = cols;
     }
 
     public static boolean saveSettings(int cols, ArrayList<String> packages, Context context){
-        Toast.makeText(context, "" + cols, Toast.LENGTH_LONG).show();
         PACKAGES.add("com.whatsapp");
         PACKAGES.add("com.facebook.katana");
         PACKAGES.add("com.instagram.android");
