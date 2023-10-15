@@ -312,7 +312,7 @@ public class Welcome extends Fragment {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(GlobalSettings.saveSettings(opc, PACKAGES, getContext())){
+                if(GlobalSettings.saveSettings(GlobalSettings.NUMS_COLUMS_GRID_APPS, PACKAGES, getContext())){
                     Toast.makeText(getContext(), "Datos guardados.", Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(GlobalSettings.MAIN_ACTIVITY, HomeView.class);
                     startActivity(i);

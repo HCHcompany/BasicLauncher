@@ -93,6 +93,13 @@ public class GlobalSettings{
         PACKAGES.add("com.facebook.lite");
         PACKAGES.add("com.instagram.lite");
         PACKAGES.add("com.facebook.orca");
+        PACKAGES.add("com.pinterest");
+        PACKAGES.add("com.zhiliaoapp.musically");
+        PACKAGES.add("com.twitter.android");
+        PACKAGES.add("com.google.android.youtube");
+        PACKAGES.add("com.spotify.music");
+        PACKAGES.add("com.google.android.youtube");
+        PACKAGES.add("com.android.chrome");
 
         for(String new_p : packages){
             if(!PACKAGES.contains(new_p)){
