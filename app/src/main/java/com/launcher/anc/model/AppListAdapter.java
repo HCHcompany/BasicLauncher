@@ -2,7 +2,9 @@ package com.launcher.anc.model;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.media.Image;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.launcher.anc.GlobalSettings;
 import com.launcher.anc.R;
 
 import java.util.ArrayList;
@@ -59,9 +62,17 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
         }
 
         AppModel item = getItem(position);
-        ((ImageView)view.findViewById(R.id.icon)).setImageDrawable(item.getIcon());
-        ((TextView)view.findViewById(R.id.text)).setText(item.getLabel());
+        ImageView icon = (ImageView)view.findViewById(R.id.icon);
+        TextView title = (TextView)view.findViewById(R.id.text);
 
+        Log.i("GlobalSIze: ", "X: " + GlobalSettings.XDPI_ICON_GRID);
+        icon.getLayoutParams().width = (int)GlobalSettings.XDPI_ICON_GRID;
+        icon.getLayoutParams().height = (int)GlobalSettings.YDPI_ICON_GRID;
+        //icon.setLayoutParams(new ViewGroup.LayoutParams(10, 10));
+
+        //Añadir informacion.
+        icon.setImageDrawable(item.getIcon());
+        title.setText(item.getLabel());
         return view;
     }
 

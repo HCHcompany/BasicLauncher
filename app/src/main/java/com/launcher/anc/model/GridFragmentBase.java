@@ -1,14 +1,27 @@
 package com.launcher.anc.model;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.Layout;
+import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -20,10 +33,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.launcher.anc.GlobalSettings;
 import com.launcher.anc.listeners.HomeListener;
 import com.launcher.anc.listeners.WagonListener;
+import com.launcher.anc.wagon.WagonView;
 
 public class GridFragmentBase extends Fragment{
 
@@ -36,6 +51,8 @@ public class GridFragmentBase extends Fragment{
     private CharSequence mEmptyText = null; // Texto de mensaje "empty text default".
     private boolean mGridShown = false; // Estado vista grilla mostrar/no mostrar.
     private ListAdapter mAdapter = null; // Adaptador de lista para mostrar los items en la grilla.
+    private boolean isTouch = false;
+    private Thread updateThread = null;
 
     private final Runnable mRequestFocus = new Runnable() { // Solicitar enfoque de la grilla.
         @Override
@@ -45,9 +62,11 @@ public class GridFragmentBase extends Fragment{
     };
 
     private final int INSTANCE; //Tipo de clase Home o Wagon.
+    private final FragmentActivity activity;
 
-    public GridFragmentBase(int instance){
+    public GridFragmentBase(FragmentActivity activity, int instance){
          this.INSTANCE = instance;
+         this.activity = activity;
     }
 
     @Nullable
@@ -55,13 +74,19 @@ public class GridFragmentBase extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final Context context = getActivity(); //Contexto de la actividad es como "this".
 
+        //LoadSettings.
+        GlobalSettings.adapterIcons(GlobalSettings.NUMS_COLUMS_GRID_APPS, context);
+
+        //Create fragment.
         FrameLayout root = new FrameLayout(context); //Se añade un nuevo marco como base a esta actividad o fragmento.
+        root.setFitsSystemWindows(true);
 
         //------------------------------------Frame para barra de carga o progreso-------------------------------------------------
         LinearLayout pframe = new LinearLayout(context); //marco base para la barra de progreso.
         pframe.setOrientation(LinearLayout.VERTICAL); // Orientacion vertical.
         pframe.setVisibility(View.GONE); // Vista visible.
         pframe.setGravity(Gravity.CENTER); // Punto de gravedad de los objetos en el centro del marco.
+        pframe.setFitsSystemWindows(true);
 
         ProgressBar progress = new ProgressBar(context, null, android.R.attr.progressBarStyleLarge); // Nueva barra de progreso.
         pframe.addView(progress, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)); // Añadir barra de progreso a el marco de carga como W: WrapContent && H: WrapContent.
@@ -69,11 +94,19 @@ public class GridFragmentBase extends Fragment{
 
         //--------------------------------------Frame para la vista de aplicaciones-------------------------------------------------
 
-        FrameLayout lframe = new FrameLayout(context); // Marco base para la lista o grilla de aplicaciones.
+        LinearLayout lframe = new LinearLayout(context); // Marco base para la lista o grilla de aplicaciones.
+        lframe.setOrientation(LinearLayout.VERTICAL); // Orientacion vertical.
+        lframe.setVisibility(View.GONE); // Vista visible.
+        lframe.setGravity(Gravity.CENTER); // Punto de gravedad de los objetos en el centro del marco.
+        lframe.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100));
+        lframe.setFitsSystemWindows(true);
+
         TextView tv = new TextView(context); // Nuevo texto que se mostrara en el caso que no existan aplicaciones.
         lframe.addView(tv, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)); // Añadir vista de texto por defecto al marco base de la lista.
 
         AppGridView gridapps = new AppGridView(context); // Grilla para listar las aplicaciones.
+        gridapps.setFitsSystemWindows(true);
+
         //Dependiendo de la version del SDK se desactivara overscroll.
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD){
             gridapps.setOverScrollMode(ListView.OVER_SCROLL_NEVER); // desabilitar overscroll.
@@ -92,9 +125,125 @@ public class GridFragmentBase extends Fragment{
             pframe.setId(GlobalSettings.ID_WAGON_PROGRESS_CONTAINER); // Asignar ID.
         }
 
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int pixm = 0;
+        if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+            pixm = 110;
+            EditText txt = new EditText(context);
+            ViewGroup.LayoutParams lp1 = new LinearLayout.LayoutParams(((metrics.widthPixels / 2) + 250), pixm);
+            txt.setLayoutParams(lp1);
+            txt.setHint("Buscar app");
+            txt.setTextSize(12);
+            txt.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            txt.setFocusable(true);
+            txt.setSelectAllOnFocus(true);
+
+            txt.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+                @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override public void afterTextChanged(Editable editable) {}
+            });
 
 
-        lframe.addView(gridapps, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)); // Se añade la grilla al marco de vista de aplicaciones.
+            txt.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if(GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT == 0){
+                        GlobalSettings.WAGON_GRID_VIEW = gridapps;
+                        GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = gridapps.getLayoutParams().height;
+                    }
+                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    isTouch = true;
+                    return false;
+                }
+            });
+
+            txt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT == 0){
+                        GlobalSettings.WAGON_GRID_VIEW = gridapps;
+                        GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = gridapps.getLayoutParams().height;
+                    }
+                    gridapps.getLayoutParams().height = (int)(GlobalSettings.YDPI_ICON_GRID * 2) + (int)(GlobalSettings.YDPI_ICON_GRID / 2);
+                    isTouch = true;
+                }
+            });
+
+            updateThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        Thread.sleep(1000);
+                        while(true){
+                              if(isTouch){
+                                  InputMethodManager mi = (InputMethodManager)GlobalSettings.WAGON_ACTIVITY.getSystemService(Context.INPUT_METHOD_SERVICE);
+                                  if(mi.isActive()){
+                                      if(GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT != 0){
+                                          gridapps.getLayoutParams().height =  GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT;
+                                          GlobalSettings.WAGON_GRID_VIEW_DEFAULT_SIZE_HEIGHT = 0;
+                                          GlobalSettings.WAGON_GRID_VIEW = null;
+                                      }
+                                      isTouch = false;
+                                      //break;
+                                  }
+                              }else{
+                                  Thread.sleep(1000);
+                              }
+                        }
+                    }catch (Exception e){}
+                }
+            });
+            updateThread.start();
+
+            txt.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
+
+            //gridapps.setY(pixm);
+            //txt.setY(pixm);
+
+
+            lframe.addView(txt, lp1);
+        }
+
+        //Boton para abrir la grilla.
+        Button ini = new Button(context);
+        ViewGroup.LayoutParams lp = new LinearLayout.LayoutParams(200, 200);
+        ini.setLayoutParams(lp);
+        ini.setY(30);
+        ini.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(INSTANCE == GlobalSettings.HOME_INSTANCE){
+                   Intent i = new Intent(activity, WagonView.class);
+                   startActivity(i);
+                }else if(INSTANCE == GlobalSettings.WAGON_INSTANCE){
+                    activity.finish();//Terminar vagon.
+                }
+            }
+        });
+
+        //Añadir al marco.
+        lframe.addView(gridapps, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (metrics.heightPixels - ((lp.height + (lp.height / 2))) - (pixm)))); // Se añade la grilla al marco de vista de aplicaciones.
+        lframe.addView(ini, lp); // Se añade la grilla al marco de vista de aplicaciones.
+
         root.addView(lframe, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)); // Se añade el marco de vista de aplicaciones al marco root de la actividad.
 
         //----------------------------------------------------------------------------------------------------------------------------------

@@ -5,5 +5,5 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.Project" parent="Base.Theme.Project" />
+    <style name="Theme.Project" parent="android:Theme.Wallpaper.NoTitleBar" />
 </resources>

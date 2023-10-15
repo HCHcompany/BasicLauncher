@@ -1,6 +1,7 @@
 package com.launcher.anc.model;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.widget.GridView;
 
 import com.launcher.anc.GlobalSettings;

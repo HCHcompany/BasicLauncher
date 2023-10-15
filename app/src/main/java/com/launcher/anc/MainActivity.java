@@ -1,16 +1,21 @@
 package com.launcher.anc;
 
-import androidx.fragment.app.FragmentActivity;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
-public class MainActivity extends FragmentActivity {
+import com.launcher.anc.home.HomeView;
+
+public class MainActivity extends Activity{
 
     private boolean isHome = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home);
+
+        Intent i = new Intent(this, HomeView.class);
+        startActivity(i);
     }
 
     @Override
