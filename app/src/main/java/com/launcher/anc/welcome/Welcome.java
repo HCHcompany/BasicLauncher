@@ -322,7 +322,6 @@ public class Welcome extends Fragment {
                 }
             }
         });
-
         return frame;
     }
 }
